@@ -1,6 +1,6 @@
 # DB Finance (DB Track)
 
-Hasil pemecahan `FinTrack.html` menjadi proyek modular. Tampilan dan fitur tidak diubah.
+Hasil pemecahan `FinTrack.html` menjadi proyek modular. Tampilan dan fitur tidak diubah. 
 
 ```
 DB Finance/         frontend (statis)
