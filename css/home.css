@@ -435,3 +435,9 @@
     font-size: 20px;
   }
 }
+
+/* Nominal panjang: font mengecil otomatis agar tidak bablas */
+.st-v .long { font-size: 18px; }
+@media (min-width:1024px) {
+  .st-v .long { font-size: 20px; }
+}

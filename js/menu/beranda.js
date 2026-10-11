@@ -4,7 +4,7 @@ import { bal, budTotal, firstName, inMonth, initials, mask, saldoAt, sortTx, spe
 import { CAT, TYPE_LBL, maskNo } from '../core/catalog.js';
 import { ic } from '../core/icons.js';
 import { S, U } from '../core/store.js';
-import { MSHORT, TODAY_S, esc, fmt, num, pc, sgn, shiftMK } from '../core/utils.js';
+import { MSHORT, TODAY_S, esc, fmt, fmtShort, num, pc, sgn, shiftMK } from '../core/utils.js';
 import { barChart, chart, donut, yearData } from '../ui/charts.js';
 import { abadge, bar, barCls, billDue, ciEl, monthPicker, trend, txRow } from '../ui/components.js';
 
@@ -12,6 +12,12 @@ import { abadge, bar, barCls, billDue, ciEl, monthPicker, trend, txRow } from '.
 export function renderBeranda() {
   const mk = U.month, cur = inMonth(mk), inc = sum(cur, 'in'), out = sum(cur, 'out'), prev = inMonth(shiftMK(mk, -1)), pi = sum(prev, 'in'), po = sum(prev, 'out');
   const bt = budTotal(), left = bt - out, pl = bt ? Math.max(0, Math.round(left / bt * 100)) : 0, sal = saldoAt(mk), net = inc - out, sc = pc(sal, saldoAt(shiftMK(mk, -1)));
+  // Nominal >= 100 jt: format singkat + class long (font mengecil)
+  const fmtAuto = n => {
+    const big = Math.abs(n) >= 1e8;
+    const s = big ? fmtShort(n) : fmt(n);
+    return big ? `<span class="long">${s}</span>` : s;
+  };
   const stat = (cls, icn, label, val, sub, extra = '') => `<div class="card stat"><div class="st-h"><span class="ci lg ${cls}">${ic(icn, 22)}</span><span>${label}</span></div><div class="st-v">${val}${extra}</div><div class="st-s">${sub}</div></div>`;
   const spent = spentBy(mk), cats = CAT.out.map(c => ({ ...c, v: spent[c.id] || 0 })).filter(c => c.v > 0).sort((a, b) => b.v - a.v);
   const y = +mk.slice(0, 4);
@@ -24,9 +30,9 @@ export function renderBeranda() {
    <span class="hdr-acts"><button class="btn" data-act="tf">${ic('swap', 16)}Transfer</button><button class="btn" data-act="add" data-v="in"><span class="g-t" style="display:flex">${ic('plus', 16)}</span>Pemasukan</button><button class="btn pri" data-act="add" data-v="out">${ic('minus', 16)}Pengeluaran</button></span></div></div>
  <div class="home">
   <div class="stats">
-   ${stat('g', 'wallet', mk === TODAY_S.slice(0, 7) ? 'Total Saldo' : 'Saldo Akhir ' + MSHORT[+mk.slice(5, 7) - 1], `<span>${mask(fmt(sal))}</span><button class="eye" data-act="hide" aria-label="Tampilkan atau sembunyikan saldo">${ic(S.hide ? 'eyeoff' : 'eye', 18)}</button>`, trend(sc))}
-   ${stat('g', 'aup', 'Pemasukan', fmt(inc), trend(pc(inc, pi)))}
-   ${stat('r', 'adn', 'Pengeluaran', fmt(out), trend(pc(out, po), false))}
+   ${stat('g', 'wallet', mk === TODAY_S.slice(0, 7) ? 'Total Saldo' : 'Saldo Akhir ' + MSHORT[+mk.slice(5, 7) - 1], `<span>${mask(fmtAuto(sal))}</span><button class="eye" data-act="hide" aria-label="Tampilkan atau sembunyikan saldo">${ic(S.hide ? 'eyeoff' : 'eye', 18)}</button>`, trend(sc))}
+   ${stat('g', 'aup', 'Pemasukan', fmtAuto(inc), trend(pc(inc, pi)))}
+   ${stat('r', 'adn', 'Pengeluaran', fmtAuto(out), trend(pc(out, po), false))}
    ${stat('b', 'wallet', 'Sisa Anggaran', fmt(Math.max(0, left)), `<span class="tr ${left >= 0 ? 'g' : 'r'}">${left >= 0 ? pl + '% dari total budget' : 'Melebihi anggaran ' + fmt(-left)}</span><div style="margin-top:9px">${bar(usedP, barCls(usedP))}</div>`)}
   </div>
   <div class="quick h-quick">

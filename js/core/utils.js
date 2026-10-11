@@ -22,6 +22,9 @@ export const num = n => Math.round(n).toLocaleString('id-ID');
 
 export const fmt = n => (n < 0 ? '-' : '') + 'Rp ' + num(Math.abs(n));
 
+// Format singkat untuk nominal besar di kartu: Rp 799.990.000 -> Rp800 jt
+export const fmtShort = n => (n < 0 ? '-' : '') + 'Rp' + compact(n);
+
 export const compact = n => {
   const a = Math.abs(n);
   if (a >= 1e6) {
