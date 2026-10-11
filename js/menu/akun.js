@@ -95,20 +95,12 @@ export function bindAkun() {
     if (e) e.textContent = v;
   }
 
-  async function updateStats() {
-    try {
-      const data = await api.get('/accounts?limit=1000&offset=0');
-      const items = data.items || data || [];
-      const aktif = items.filter(a => a.is_active !== false).length;
-      setStat('dbfStatTotal', items.length);
-      setStat('dbfStatAktif', aktif);
-      setStat('dbfStatNonaktif', items.length - aktif);
-    } catch (e) {
-      console.warn('Gagal memuat statistik anggota:', e);
-      setStat('dbfStatTotal', '–');
-      setStat('dbfStatAktif', '–');
-      setStat('dbfStatNonaktif', '–');
-    }
+  function updateStats(items) {
+    items = items || [];
+    const aktif = items.filter(a => a.is_active !== false).length;
+    setStat('dbfStatTotal', items.length);
+    setStat('dbfStatAktif', aktif);
+    setStat('dbfStatNonaktif', items.length - aktif);
   }
 
   async function load() {
@@ -117,6 +109,7 @@ export function bindAkun() {
       const items = data.items || [];
       document.getElementById('akunInfo').textContent =
         `Menampilkan ${items.length} dari ${data.total || 0} akun`;
+      updateStats(items);
       list.innerHTML = items.map(a => {
         const status = a.is_active ? '<span class="badge">Aktif</span>' : '<span class="badge r">Nonaktif</span>';
         const aksi = a.tier === 0 ? '<span class="mu">—</span>'
@@ -160,7 +153,7 @@ export function bindAkun() {
             await api.delete(`/accounts/${b.getAttribute('data-hard')}/hard`);
             toast('Akun dihapus permanen.');
           } catch (e) { toast('Gagal: ' + e.message); }
-          load(); updateStats();
+      load();
         }, 'Hapus Permanen');
       }));
     } catch (e) {
@@ -168,7 +161,7 @@ export function bindAkun() {
     }
   }
 
-  document.getElementById('akunReload').addEventListener('click', () => { load(); updateStats(); });
+  document.getElementById('akunReload').addEventListener('click', () => { load(); });
   document.getElementById('akunAddForm').addEventListener('submit', async e => {
     e.preventDefault();
     const msg = document.getElementById('akunAddMsg');
@@ -186,7 +179,6 @@ export function bindAkun() {
       e.target.reset();
       document.getElementById('akunTier').value = '3';
       load();
-      updateStats();
     } catch (err) {
       msg.classList.add('err');
       msg.textContent = 'Gagal: ' + err.message;
@@ -194,5 +186,4 @@ export function bindAkun() {
   });
 
   load();
-  updateStats();
 }

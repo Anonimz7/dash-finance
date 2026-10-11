@@ -24,6 +24,8 @@ export async function loadAccess(fallbackKeys = []) {
   } else {
     allowed = new Set(fallbackKeys);
   }
+  // Account Center selalu boleh dibuka (self-service); konten tab diatur per tab
+  allowed.add('akun-center');
 }
 
 export const can = menuId => allowed.has(menuId);
